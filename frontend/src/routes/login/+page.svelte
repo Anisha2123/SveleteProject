@@ -1,10 +1,65 @@
+
+
 <script>
+  import { onMount } from 'svelte';
+  
   let email = '';
   let password = '';
-  const handleLogin = () => {
-    // Your login logic here
+  let errorMessage = '';
+  let successMessage = '';
+
+  const handleLogin = async () => {
+    errorMessage = '';
+    successMessage = '';
+
+    if (!email || !password) {
+      errorMessage = 'Please fill in all fields.';
+      return;
+    }
+
+    try {
+      const response = await fetch('http://localhost:3000/api/login', {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json',
+        },
+        body: JSON.stringify({ email, password }),
+      });
+
+      if (!response.ok) {
+        const errorData = await response.json();
+        errorMessage = errorData.message || 'Login failed. Please try again.';
+        return;
+      }
+
+      const data = await response.json();
+      successMessage = 'Login successful! Redirecting...';
+      console.log('Login success:', data);
+
+      // Redirect to another page after successful login
+      setTimeout(() => {
+        window.location.href = '/dashboard';
+      }, 2000);
+    } catch (error) {
+      console.error('Error during login:', error);
+      errorMessage = 'An unexpected error occurred. Please try again.';
+    }
   };
 </script>
+
+<style>
+  .error-message {
+    color: red;
+    margin-top: 10px;
+    font-size: 0.9rem;
+  }
+
+  .success-message {
+    color: green;
+    margin-top: 10px;
+    font-size: 0.9rem;
+  }
+</style>
 
 <form class="max-w-md mx-auto mt-10 p-6 border rounded-lg shadow-lg">
   <h2 class="text-2xl font-semibold mb-6 text-center">Login</h2>
@@ -28,6 +83,12 @@
       placeholder="Enter your password"
     />
   </div>
+  {#if errorMessage}
+    <p class="error-message">{errorMessage}</p>
+  {/if}
+  {#if successMessage}
+    <p class="success-message">{successMessage}</p>
+  {/if}
   <button
     type="button"
     on:click={handleLogin}
