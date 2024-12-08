@@ -6,13 +6,20 @@ const cors = require('cors');
 const { createClient } = require('@supabase/supabase-js');
 
 const app = express();
-app.use(cors());
+app.use(cors(
+    {
+        origin: 'http://localhost:5173', // or '*' to allow any origin
+  methods: ['GET', 'POST', 'PUT', 'DELETE'],
+    }
+));
 app.use(express.json());
 
-const SUPABASE_URL = 'https://your-supabase-url';
-const SUPABASE_KEY = 'your-supabase-key';
+const SUPABASE_URL = 'https://awodhficgyitbkghhjba.supabase.co';
+const SUPABASE_KEY = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6ImF3b2RoZmljZ3lpdGJrZ2hoamJhIiwicm9sZSI6ImFub24iLCJpYXQiOjE3MzM2NTE5MjcsImV4cCI6MjA0OTIyNzkyN30.7HwK57CmB5i0VcmLNP3ZVqdf-N79VNJkk5FNSo-7Wdg';
 const supabase = createClient(SUPABASE_URL, SUPABASE_KEY);
-const JWT_SECRET = 'your-jwt-secret';
+// const JWT_SECRET = 'your-jwt-secret';
+
+  
 
 // Middleware to protect routes
 function authenticate(req, res, next) {
@@ -36,7 +43,7 @@ app.post('/api/signup', async (req, res) => {
 
   // Check if user already exists
   const { data: existingUser } = await supabase
-    .from('users')
+    .from('UserTable')
     .select('*')
     .eq('email', email)
     .single();
@@ -48,14 +55,15 @@ app.post('/api/signup', async (req, res) => {
   // Hash password and save user
   const hashedPassword = await bcrypt.hash(password, 10);
   const { data, error } = await supabase
-    .from('users')
+    .from('UserTable')
     .insert([{ name, email, password: hashedPassword }]);
 
   if (error) {
     return res.status(500).json({ message: 'Error creating user' });
   }
 
-  res.status(201).json({ message: 'User created successfully' });
+  // Returning created user data (e.g., user id and email)
+  res.status(201).json({ message: 'User created successfully', user: data[0] });
 });
 
 // User Login
@@ -63,7 +71,7 @@ app.post('/api/login', async (req, res) => {
   const { email, password } = req.body;
 
   const { data: user, error } = await supabase
-    .from('users')
+    .from('UserTable')
     .select('*')
     .eq('email', email)
     .single();
@@ -90,7 +98,7 @@ app.post('/api/update-profile', authenticate, async (req, res) => {
   const { userId } = req.user;
 
   const { data, error } = await supabase
-    .from('users')
+    .from('UserTable')
     .update({ name, email })
     .eq('id', userId);
 
