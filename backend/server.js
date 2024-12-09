@@ -68,28 +68,41 @@ app.post('/api/signup', async (req, res) => {
 
 // User Login
 app.post('/api/login', async (req, res) => {
-  const { email, password } = req.body;
+    const { email, password } = req.body;
 
-  const { data: user, error } = await supabase
-    .from('UserTable')
-    .select('*')
-    .eq('email', email)
-    .single();
+    console.log('Login request received:', { email, password });
+    const trimmedEmail = email.trim();
+  try {
+    // Query the database for the user with the provided email
+    const { data: users, error } = await supabase
+      .from('UserTable')
+      .select('*')
+      .ilike('email', email);
+    // .eq('email', trimmedEmail);
 
-  if (error || !user) {
-    return res.status(400).json({ message: 'Invalid credentials' });
+      console.log('Supabase query result:', { users, error });
+
+    if (error) {
+      console.error('Supabase error:', error);
+      return res.status(500).json({ message: 'Server error' });
+    }
+
+    if (users.length === 0) {
+      return res.status(400).json({ message: 'Invalid credentials1' });
+    }
+
+    const user = users[0]; // Take the first (and ideally only) user
+    const isPasswordValid = await bcrypt.compare(password, user.password);
+
+    if (!isPasswordValid) {
+      return res.status(400).json({ message: 'Invalid credentials2' });
+    }
+
+    res.status(200).json({ message: 'Login successful', user });
+  } catch (err) {
+    console.error('Server error:', err);
+    res.status(500).json({ message: 'Server error' });
   }
-
-  const isValid = await bcrypt.compare(password, user.password);
-  if (!isValid) {
-    return res.status(400).json({ message: 'Invalid credentials' });
-  }
-
-  // Create JWT token
-  const payload = { userId: user.id };
-  const token = jwt.encode(payload, JWT_SECRET);
-
-  res.json({ token });
 });
 
 // Update Profile
