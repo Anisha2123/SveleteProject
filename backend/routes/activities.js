@@ -1,22 +1,42 @@
 
+// // Log user activity
+// app.post('/api/activity', async (req, res) => {
+//   const { user_id, action } = req.body;
+//   const ip_address = req.headers['x-forwarded-for'] || req.connection.remoteAddress;
 
-// backend/routes/activities.js
-const { supabase } = require('../utils/supabase');  // Initialize Supabase client
+//   try {
+//     const { data, error } = await supabase
+//       .from('ActivityTable')
+//       .insert([{ user_id, action, timestamp: new Date(), ip_address }]);
 
-module.exports = async (req, res) => {
-  const { user_id } = req.user; // Assuming user is authenticated
+//     if (error) {
+//       console.error('Error logging activity:', error);
+//       return res.status(500).json({ message: 'Error logging activity' });
+//     }
 
-  // Fetch activities from the database for the authenticated user
-  const { data, error } = await supabase
-    .from('activities')
-    .select('*')
-    .eq('user_id', user_id)
-    .order('timestamp', { ascending: false });
+//     res.status(201).json({ message: 'Activity logged successfully' });
+//   } catch (err) {
+//     console.error('Unexpected error:', err);
+//     res.status(500).json({ message: 'An unexpected error occurred' });
+//   }
+// });
 
-  if (error) {
-    return res.status(500).json({ error: error.message });
-  }
+// // Fetch activities for dashboard
+// app.get('/api/activities', async (req, res) => {
+//   try {
+//     const { data, error } = await supabase
+//       .from('ActivityTable')
+//       .select('action, timestamp, ip_address')
+//       .order('timestamp', { ascending: false });
 
-  // Send the activities as response
-  res.json({ activities: data });
-};
+//     if (error) {
+//       console.error('Error fetching activities:', error);
+//       return res.status(500).json({ message: 'Error fetching activities' });
+//     }
+
+//     res.status(200).json({ activities: data });
+//   } catch (err) {
+//     console.error('Unexpected error:', err);
+//     res.status(500).json({ message: 'An unexpected error occurred' });
+//   }
+// });
