@@ -33,6 +33,11 @@
 		"jwt-simple": "^0.5.6",
 		"supabase": "^2.0.0"
 	},
+	"engines": {
+		  "node": "18.x"
+		},
+	  
+	  
 	"description": "Everything you need to build a Svelte project, powered by [`sv`](https://github.com/sveltejs/cli).",
 	"main": "svelte.config.js",
 	"keywords": [],
