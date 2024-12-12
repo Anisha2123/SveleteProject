@@ -126,7 +126,8 @@
 
     <p class="mt-6 text-center text-sm text-gray-500">
       By logging in, you agree to our
-      <a href="#" class="text-blue-600 hover:underline">terms and conditions</a>.
+      <a href="javascript:void(0)" class="text-blue-600 hover:underline">terms and conditions</a>.
+
     </p>
   </div>
 </div>
